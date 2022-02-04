@@ -1,10 +1,11 @@
-#include <sms.h>
-#include <stdio.h>
-// asm ("#include \"macros.inc\"");
+#include "draw.c" // TODO
 
 typedef struct {} TGraphWeb;
 extern struct {} __vt__11TBossWanwan, __vt__11TFireWanwan;
-extern uint8_t pattern[4];
+extern uint8_t pattern[3];
+extern uint8_t cursor;
+extern uint16_t lastButton;
+
 int getRandomNextIndex__9TGraphWebCFiiUl(TGraphWeb *graphWeb, int curIndex, int prevIndex, uint32_t r6);
 typedef struct {
   void *__vt__;
@@ -98,42 +99,33 @@ fallback:
   return getRandomNextIndex__9TGraphWebCFiiUl(graphWeb, curIndex, prevIndex, -1);
 }
 
-J2DTextBox textbox;
-const JUTRect textboxRect = {10, 320-40, 800, 320+20};
-uint8_t press[4];
-uint8_t cursor;
-char *fmt = "Pattern %c%X%c%X%c%X   ";
-
-void onSetup() {
-  J2DTextBox_Create(&textbox, 0, &textboxRect, GameFont, fmt, 2, 0);
-}
-
-int onUpdate(void) {
-  // asm ("mr r29, r3"); // 800F9B74
-  #define REGISTER_BUTTON(button, pressed, ACTION) \
-    if (ControllerOne.buttons == (button)) { \
-      if (!pressed) { \
-        pressed = 1; \
-        ACTION; \
-      } \
-    } else { \
-      pressed = 0; \
-    }
-  REGISTER_BUTTON(PRESS_L|PRESS_DL, press[0], cursor=(cursor+3)%4)
-  REGISTER_BUTTON(PRESS_L|PRESS_DR, press[1], cursor=(cursor+1)%4)
-  REGISTER_BUTTON(PRESS_L|PRESS_DU, press[2],
-   if(cursor==0)cursor=1; pattern[cursor-1]=pattern[cursor-1]>=4?0:pattern[cursor-1]+1)
-  REGISTER_BUTTON(PRESS_L|PRESS_DD, press[3],
-   if(cursor==0)cursor=1; pattern[cursor-1]=pattern[cursor-1]==0?4:pattern[cursor-1]-1)
-}
 void onDraw2D(J2DGrafContext* graphics) {
-  snprintf(J2DTextBox_GetStringPtr(&textbox), 24, fmt,
-    cursor==1 ? '#' : ' ',
+  J2DGrafContext_Setup2D(graphics);
+
+  #define REGISTER_BUTTON(button, ACTION) \
+    if (ControllerOne.buttons == (button) && (lastButton & (button)) != (button)) { \
+      ACTION; \
+    }
+  REGISTER_BUTTON(PRESS_L|PRESS_DL, cursor=(cursor+3)%4)
+  REGISTER_BUTTON(PRESS_L|PRESS_DR, cursor=(cursor+1)%4)
+  REGISTER_BUTTON(PRESS_L|PRESS_DU,
+   if(cursor==3) cursor=0; pattern[cursor] = pattern[cursor]>=4 ? 0 : pattern[cursor]+1)
+  REGISTER_BUTTON(PRESS_L|PRESS_DD,
+   if(cursor==3) cursor=0; pattern[cursor] = pattern[cursor]==0 ? 4 : pattern[cursor]-1)
+
+  // void drawText(int x, int y, int fontSize, uint32_t colorTop, uint32_t colorBot, const char *fmt, ...)
+  drawText(16, 320, 20, 0xffffffff, 0xffffffff, "Pattern %c%X%c%X%c%X",
+    cursor==0 ? '#' : ' ',
     pattern[0],
-    cursor==2 ? '#' : ' ',
+    cursor==1 ? '#' : ' ',
     pattern[1],
-    cursor==3 ? '#' : ' ',
+    cursor==2 ? '#' : ' ',
     pattern[2]
   );
-  J2DScreen_Draw((J2DScreen*)&textbox, 0, 0, graphics, 0x81);
+
+  // next
+  lastButton = ControllerOne.buttons;
+
+  // restore
+  J2DGrafContext_Setup2D(graphics);
 }
