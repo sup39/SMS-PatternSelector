@@ -1,3 +1,4 @@
+## gpSystemFont__r13 = gpSystemFont - r13
 .extern gpSystemFont__r13, __ct__8J2DPrintFP7JUTFontiiQ28JUtility6TColorQ28JUtility6TColor, PSMTXTrans, GXLoadPosMtxImm, J2DPrint_print_alpha_va
 
 	.file	"draw.c"
