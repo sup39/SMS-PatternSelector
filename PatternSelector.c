@@ -1,4 +1,5 @@
-#include "draw.c" // TODO
+#include <sms.h>
+#include "draw.h"
 
 typedef struct {} TGraphWeb;
 extern struct {} __vt__11TBossWanwan, __vt__11TFireWanwan;
