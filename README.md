@@ -15,4 +15,3 @@ In `NTSC-J 1.0`, I insert the functions at:
 |`8024F324`|`TSpineEnemy::goToRandomNextGraphNode`|`(mr r6, r31)`|
 |`8024F32C`|`TSpineEnemy::goToRandomNextGraphNode`|`getRandomNextIndex`|
 |`8020675C`|`TGCConsole2::perform`|`onDraw2D`|
-|`8010E418`|`TMarDirector::direct`|`setup`(draw.c)|
