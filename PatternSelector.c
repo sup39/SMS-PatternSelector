@@ -5,10 +5,6 @@
 static uint8_t pattern[3];
 static uint8_t cursor;
 static uint16_t lastButton;
-static char cursorUI[6] = {
-  // [0]3, [1]2, [2]1, [3]0
-  ' ', ' ', ' ', '#', ' ', ' '
-};
 static int8_t patterns[][4] = {
   /**** case '2' ****/
   // [0] 33: up, right
@@ -99,14 +95,22 @@ void onDraw2D(J2DGrafContext* graphics) {
   handlePattern(PRESS_L|PRESS_DU, 1); // +1 %5
   handlePattern(PRESS_L|PRESS_DD, 4); // -1 %5
 
-  // void drawText(int x, int y, int fontSize, uint32_t colorTop, uint32_t colorBot, const char *fmt, ...)
-  char *csStr = cursorUI+(3-cursor);
+  // prepare cursor string
+  const uint32_t magic = 0x23202020; // "   #"
+  uint32_t cs;
+  asm (
+    "rlwnm %0, %1, %2, 0, 31"
+    : "=r"(cs)
+    : "r"(magic), "r"((3-cursor)*8) // 8 bit per shift
+  );
+
+  // draw(x, y, fontSize, colorTop, colorBot, fmt, ...)
   drawText(16, 320, 20, 0xffffffff, 0xffffffff, "Pattern %c%X%c%X%c%X",
-    csStr[0],
+    (char)(cs>>16),
     pattern[0],
-    csStr[1],
+    (char)(cs>>8),
     pattern[1],
-    csStr[2],
+    (char)(cs),
     pattern[2]
   );
 
